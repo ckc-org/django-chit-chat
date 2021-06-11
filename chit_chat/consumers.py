@@ -72,8 +72,7 @@ class ChatRoomConsumer(AsyncWebsocketConsumer):
             if message_type == 'chat':
                 data['user'] = user.pk
 
-                message = await self.validate_chat_message(data)
-                if message:
+                if message := await self.validate_chat_message(data):
                     await self.channel_layer.group_send(
                         str(message.room.pk),
                         {
