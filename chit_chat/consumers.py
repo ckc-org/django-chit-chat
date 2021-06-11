@@ -32,7 +32,6 @@ def async_validation_exception_handler(func):
                 errors = {'field_errors': errors}
             await self.send(text_data=json.dumps(errors))
         except Exception as e:  # pragma: no cover
-            print(e)
             await self.send(text_data=json.dumps({'non_field_errors': ['System Error']}))
             raise e
     return inner

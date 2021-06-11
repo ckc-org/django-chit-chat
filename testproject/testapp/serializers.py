@@ -9,4 +9,3 @@ class ChatTestSerializer(ChatMessageSerializer):
     def validate_text(self, text):
         if text == 'hello':
             raise serializers.ValidationError(ChatTestSerializer.text_error)
-

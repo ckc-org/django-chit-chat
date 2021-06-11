@@ -3,13 +3,11 @@ from django.contrib.sessions.models import Session
 from django.contrib.auth import HASH_SESSION_KEY, SESSION_KEY, BACKEND_SESSION_KEY, get_user_model
 from django.conf import settings
 from django.test import override_settings
-from rest_framework import serializers
 from channels.routing import get_default_application
 from channels.testing import WebsocketCommunicator
 from channels.db import database_sync_to_async
 from asyncio.exceptions import TimeoutError
 
-from chit_chat.consumer_serializers import ChatMessageSerializer
 from chit_chat.consumers import ChatRoomConsumer
 from testproject.testapp.factories import RoomFactory, UserFactory
 from testproject.testapp.serializers import ChatTestSerializer
@@ -125,7 +123,6 @@ async def test_send_message_creates_new_message_object():
     assert resp['time']
 
     await communicator.disconnect()
-
 
 
 @pytest.mark.asyncio
