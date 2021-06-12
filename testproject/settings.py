@@ -5,11 +5,10 @@ DEBUG = True
 
 BASE_DIR = os.path.dirname(__file__)
 
-# NOTE: We're using Geospatial sqlite jazz
 DATABASES = {
     "default": {
-        "ENGINE": "django.contrib.gis.db.backends.spatialite",
-        "NAME": os.path.join(BASE_DIR, "db.sqlite3"),
+        "ENGINE": "django.db.backends.sqlite3",
+        # "NAME": os.path.join(BASE_DIR, "db.sqlite3"),
     }
 }
 
@@ -33,12 +32,14 @@ INSTALLED_APPS = (
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.staticfiles",
-    "django.contrib.gis",
 
     "chit_chat",
 
     "testapp",
+    'channels',
 )
+
+AUTH_USER_MODEL = 'testapp.User'
 
 STATIC_URL = "/static/"
 
@@ -50,3 +51,35 @@ TEMPLATES = [
         "APP_DIRS": True
     }
 ]
+
+# =============================================================================
+# DRF
+# =============================================================================
+REST_FRAMEWORK = {
+    # 'DEFAULT_AUTHENTICATION_CLASSES': (
+    #     'rest_framework.authentication.TokenAuthentication',
+    #     'rest_framework.authentication.SessionAuthentication',
+    #     'oauth2_provider.contrib.rest_framework.OAuth2Authentication',
+    # ),
+    # 'DEFAULT_PERMISSION_CLASSES': (
+    #     'rest_framework.permissions.IsAuthenticated',
+    # ),
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    'PAGE_SIZE': 100,
+    # 'DATETIME_INPUT_FORMATS': (
+    #     'iso-8601',
+    #     '%B %d, %Y',
+    # )
+}
+
+
+# =============================================================================
+# Channels
+# =============================================================================
+ASGI_APPLICATION = "routing.application"
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer"
+    },
+}

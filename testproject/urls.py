@@ -1,10 +1,10 @@
 from rest_framework import routers
 
-from testapp.viewsets import TestModelWithACreatorViewSet, TestModelWithADifferentNamedCreatorViewSet
+from chit_chat.viewsets import RoomViewSet
 
 
 router = routers.SimpleRouter()
-router.register(r'creators', TestModelWithACreatorViewSet)
-router.register(r'creators-alternative', TestModelWithADifferentNamedCreatorViewSet)
+
+router.register('chatrooms', RoomViewSet)
 
 urlpatterns = router.urls

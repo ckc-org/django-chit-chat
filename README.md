@@ -22,6 +22,39 @@ INSTALLED_APPS = (
 )
 ```
 
+```python
+# routing.py
+from channels.auth import AuthMiddlewareStack
+from django.core.asgi import get_asgi_application
+from channels.routing import ProtocolTypeRouter, URLRouter
+
+import chit_chat.routing
+
+
+application = ProtocolTypeRouter({
+    'http': get_asgi_application(),
+    'websocket': AuthMiddlewareStack(
+        URLRouter(
+            chit_chat.routing.websocket_urlpatterns
+        )
+    ),
+})
+```
+
+```python
+# urls.py
+from rest_framework import routers
+
+from chit_chat.viewsets import RoomViewSet
+
+
+router = routers.SimpleRouter()
+router.register('chatrooms', RoomViewSet)
+
+urlpatterns = router.urls
+```
+
+
 ## distributing
 
 ```bash

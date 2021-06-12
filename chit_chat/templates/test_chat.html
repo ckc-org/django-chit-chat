@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Chat test</title>
+</head>
+<body>
+    <textarea id="chat_area"></textarea>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reconnecting-websocket/1.0.0/reconnecting-websocket.min.js" integrity="sha512-B4skI5FiLurS86aioJx9VfozI1wjqrn6aTdJH+YQUmCZum/ZibPBTX55k5d9XM6EsKePDInkLVrN7vPmJxc1qA==" crossorigin="anonymous"></script>
+    <script>
+        const chat_area = document.getElementById("chat_area")
+        const ws = new WebSocket('ws://localhost:8000/ws/chatroom/')
+        // const ws = new ReconnectingWebSocket('ws://localhost:8000/ws/chatroom/', {"Sec-WebSocket-Key": "eac1ce7c5bd217c34c11db0d0455122f8c76c452"}, {debug: true})
+        // const ws = new ReconnectingWebSocket('ws://localhost:8000/ws/chatroom/', "eac1ce7c5bd217c34c11db0d0455122f8c76c452", {debug: true})
+
+        ws.addEventListener('open', () => {
+            // ws.send(JSON.stringify({"chat": "I am goku"}))
+        })
+
+        setInterval(() => {
+            ws.send(JSON.stringify({"message_type": "chat", "text": "I am goku", "room": "1"}))
+        }, 2500)
+
+        ws.addEventListener('onmessage', (message) => {
+            console.log('received')
+            console.log(message)
+            chat_area.value += message.data + "\n"
+        })
+    </script>
+</body>
+</html>
