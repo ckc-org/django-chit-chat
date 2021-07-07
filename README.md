@@ -55,12 +55,14 @@ urlpatterns = router.urls
 ```
 
 
-## distributing
+## distributing and releasing
 
 ```bash
-# change version in setup.cfg
-$ ./setup.py sdist
-$ twine upload dist/*
+# Update version in setup.cfg
+./setup.py sdist
+twine upload dist/*
+# Commit update to setup.cfg
+# Publish vX.X.X release on GitHub with a description.
 ```
 
 ## tests
