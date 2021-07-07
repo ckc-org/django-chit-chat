@@ -17,6 +17,18 @@ class TestChat(APITestCase):
         resp = self.client.post(reverse('room-list'), data=room_data)
         assert resp.status_code == 201
 
+    def test_attempt_to_create_duplicate_rooms_results_in_original_being_returned(self):
+        room_data = {
+            'members': [UserFactory().pk]
+        }
+        resp = self.client.post(reverse('room-list'), data=room_data)
+        assert resp.status_code == 201
+        room_id = resp.json()['id']
+
+        resp = self.client.post(reverse('room-list'), data=room_data)
+        assert resp.status_code == 201
+        assert room_id == resp.json()['id']
+
     def test_room_create_requires_another_user(self):
         room_data = {
             'members': [self.user.pk]

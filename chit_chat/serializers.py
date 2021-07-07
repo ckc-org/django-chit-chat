@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from django.db.models import Count
 from rest_framework import serializers, exceptions
 
 from chit_chat.models import Room, Message
@@ -55,3 +56,8 @@ class RoomSerializer(serializers.ModelSerializer):
             raise exceptions.ValidationError('Must contain at least one user other than the requestor in this list.')
         non_requestor_users.append(requestor)
         return users
+
+    def create(self, validated_data):
+        member_pks = [member.pk for member in validated_data['members']]
+        room = Room.objects.filter(members__in=member_pks).annotate(member_count=Count('members')).filter(member_count=len(member_pks)).first()
+        return room or super().create(validated_data)
