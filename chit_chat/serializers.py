@@ -59,4 +59,5 @@ class RoomSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         member_pks = [member.pk for member in validated_data['members']]
-        return Room.objects.filter(members__in=member_pks).annotate(member_count=Count('members')).filter(member_count=len(member_pks)).first() or super().create(validated_data)
+        room = Room.objects.filter(members__in=member_pks).annotate(member_count=Count('members')).filter(member_count=len(member_pks)).first()
+        return room or super().create(validated_data)
