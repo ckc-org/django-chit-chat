@@ -54,6 +54,30 @@ router.register('chatrooms', RoomViewSet)
 urlpatterns = router.urls
 ```
 
+```html
+<!-- chat.html -->
+
+<script>
+    // Open a connection to django-chit-chat
+    YourWebsocketThing.open(`wss://${window.location.host}/ws/chatroom/`)
+    
+    // Write messages to screen as they're sent/received
+    YourWebsocketThing.onmessage(msg => writeMessageToScreen(JSON.parse(msg.data)))
+    
+    // You can do a GET to "/api/chatrooms/" for a list of chatrooms + messages
+    $.get("/api/chat/rooms").success(d => ...)
+    
+    // Send a message
+    function send_message(text) {
+        WSClient.send(JSON.stringify({
+            message_type: "chat",
+            room: 1, // ID of chat room
+            text: text
+        }))
+    }
+</script>
+```
+
 
 ## distributing and releasing
 
