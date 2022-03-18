@@ -3,6 +3,7 @@ from django.db.models import Count
 from rest_framework import serializers, exceptions
 
 from chit_chat.models import Room, Message
+from .ckc_conf import chat_settings
 from .utils import PrimaryKeyWriteSerializerReadField
 
 
@@ -37,7 +38,7 @@ class RoomSerializer(serializers.ModelSerializer):
     messages = MessageSerializer(read_only=True, many=True)
     members = PrimaryKeyWriteSerializerReadField(
         queryset=User.objects.all(),
-        read_serializer=ChatUserSerializer,
+        read_serializer=chat_settings['SERIALIZERS'].USER,
         many=True,
     )
 
