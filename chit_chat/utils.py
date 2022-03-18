@@ -3,10 +3,6 @@ from collections import OrderedDict
 from rest_framework import serializers
 
 
-
-# PrimaryKeyRelatedField
-
-
 #  TODO: This should be stored in the django-ckc package
 class PrimaryKeyWriteSerializerReadField(serializers.PrimaryKeyRelatedField):
     def __init__(self, *args, **kwargs):
