@@ -7,7 +7,7 @@ User = get_user_model()
 
 
 class Room(models.Model):
-    members = models.ManyToManyField(User, related_name='chat_rooms')
+    members = models.ManyToManyField(User, related_name='chat_rooms', through='RoomMembership')
     created_when = models.DateTimeField(default=timezone.now)
 
 
