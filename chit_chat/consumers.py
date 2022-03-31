@@ -8,7 +8,6 @@ from chit_chat.consumer_serializers import ContentSerializer
 from .ckc_conf import chat_settings
 
 
-
 def async_validation_exception_handler(func):
     async def inner(*args, **kwargs):
         self = args[0]

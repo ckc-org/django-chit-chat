@@ -159,7 +159,6 @@ async def test_serializer_hook():
     with override_settings(CKC_CHAT_SERIALIZERS=ckc_chat_settings):  # Reset settings to default
         pass
 
-
     await communicator.disconnect()
 
 
