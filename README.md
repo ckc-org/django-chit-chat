@@ -83,9 +83,20 @@ urlpatterns = router.urls
 
 ```bash
 # Update version in setup.cfg
+
+# Build distribution and send to pypi
 ./setup.py sdist
 twine upload dist/*
+
 # Commit and push the version update in setup.cfg
+git commit -m "Commit message."
+
+# Tag newest commit
+git tag -a vX.X.X -m "Releasing version vX.X.X"`
+
+# Push tag to GitHub
+git push origin vX.X.X
+
 # Publish vX.X.X release on GitHub with a description.
 ```
 
