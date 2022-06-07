@@ -92,7 +92,7 @@ twine upload dist/*
 git commit -m "Commit message."
 
 # Tag newest commit
-git tag -a vX.X.X -m "Releasing version vX.X.X"`
+git tag -a vX.X.X -m "Releasing version vX.X.X"
 
 # Push tag to GitHub
 git push origin vX.X.X
