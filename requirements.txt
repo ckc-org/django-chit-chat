@@ -6,6 +6,7 @@ twine==3.1.1
 # django stuff
 Django==3.2
 djangorestframework==3.12.4
+pytz==2022.1
 
 # Channels
 channels==3.0.3
@@ -14,7 +15,7 @@ channels==3.0.3
 factory-boy==3.2.0
 
 # tests
-pytest==6.2.3
+pytest==6.2.5
 pytest-django==4.2.0
 pytest-pythonpath==0.7.3
 pytest-asyncio==0.15.0
