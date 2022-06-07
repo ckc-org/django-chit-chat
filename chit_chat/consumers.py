@@ -1,23 +1,11 @@
 import json
-from six import string_types
-from importlib import import_module
 
-from django.conf import settings
 from rest_framework import exceptions
 from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
 
-from chit_chat.consumer_serializers import ChatMessageSerializer, ContentSerializer
-
-
-def import_callable(path_or_callable):
-    if hasattr(path_or_callable, '__call__'):
-        return path_or_callable
-    else:
-        assert isinstance(path_or_callable, string_types)
-        package, attr = path_or_callable.rsplit('.', 1)
-        print('package', package)
-        return getattr(import_module(package), attr)
+from chit_chat.consumer_serializers import ContentSerializer
+from .ckc_conf import chat_settings
 
 
 def async_validation_exception_handler(func):
@@ -94,11 +82,7 @@ class ChatRoomConsumer(AsyncWebsocketConsumer):
     @async_validation_exception_handler
     @database_sync_to_async
     def validate_chat_message(self, data):
-        serializers = getattr(settings, 'CKC_CHAT_SERIALIZERS', {})
-        chat_serializer = import_callable(
-            serializers.get('CHAT_MESSAGE_SERIALIZER', ChatMessageSerializer)
-        )
-        serializer = chat_serializer(data=data)
+        serializer = chat_settings['SERIALIZERS'].MESSAGE(data=data)
         serializer.is_valid(raise_exception=True)
         return serializer.save()
 

@@ -139,19 +139,25 @@ async def test_serializer_hook():
     assert resp == {'room': room.pk, 'text': 'hello', 'type': 'chat', 'user': user.pk}
 
     ckc_chat_settings = {
-        'CHAT_MESSAGE_SERIALIZER': ChatTestSerializer,
+        'MESSAGE': ChatTestSerializer,
     }
     with override_settings(CKC_CHAT_SERIALIZERS=ckc_chat_settings):
         await communicator.send_json_to({'message_type': 'chat', 'room': room.pk, 'text': 'hello'})
         resp = await communicator.receive_json_from(timeout=3)
         assert resp == {'field_errors': {'text': [ChatTestSerializer.text_error]}}
 
-    ckc_chat_settings['CHAT_MESSAGE_SERIALIZER'] = 'testapp.serializers.ChatTestSerializer'
+    ckc_chat_settings['MESSAGE'] = 'testapp.serializers.ChatTestSerializer'
 
     with override_settings(CKC_CHAT_SERIALIZERS=ckc_chat_settings):
         await communicator.send_json_to({'message_type': 'chat', 'room': room.pk, 'text': 'hello'})
         resp = await communicator.receive_json_from()
         assert resp == {'field_errors': {'text': [ChatTestSerializer.text_error]}}
+
+    ckc_chat_settings = {
+        'MESSAGE': 'chit_chat.consumer_serializers.ChatMessageSerializer',
+    }
+    with override_settings(CKC_CHAT_SERIALIZERS=ckc_chat_settings):  # Reset settings to default
+        pass
 
     await communicator.disconnect()
 
@@ -214,7 +220,6 @@ async def test_invalid_json_returns_useful_error_message():
 @pytest.mark.asyncio
 @pytest.mark.django_db
 async def test_chat_message_proliferates_to_correct_chatroom():
-    print(settings.CHANNEL_LAYERS)
     user, session_key = await create_user()
     other_user, other_session_key = await create_user()
     room = await create_room(members=[user, other_user])
