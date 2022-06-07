@@ -40,8 +40,10 @@ class ChatRoomConsumer(AsyncWebsocketConsumer):
         await self.accept()
 
     async def disconnect(self, close_code):
-        for pk in await self.get_chat_room_pks(self.scope['user']):
-            await self.channel_layer.group_discard(str(pk), self.channel_name)
+        user = self.scope['user']
+        if user.is_authenticated:
+            for pk in await self.get_chat_room_pks(self.scope['user']):
+                await self.channel_layer.group_discard(str(pk), self.channel_name)
 
     async def receive(self, text_data=None, bytes_data=None):
         user = self.scope['user']
