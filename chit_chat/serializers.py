@@ -1,3 +1,5 @@
+from asgiref.sync import async_to_sync
+from channels.layers import get_channel_layer
 from django.contrib.auth import get_user_model
 from django.db.models import Count
 from rest_framework import serializers, exceptions
@@ -60,5 +62,13 @@ class RoomSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         member_pks = [member.pk for member in validated_data['members']]
+
         room = Room.objects.filter(members__in=member_pks).annotate(member_count=Count('members')).filter(member_count=len(member_pks)).first()
-        return room or super().create(validated_data)
+        room = room or super().create(validated_data)
+
+        # Reconnect members
+        channel_layer = get_channel_layer()
+        for pk in member_pks:
+            async_to_sync(channel_layer.group_send)(f"user-{pk}", {"type": "refresh_group_add"})
+
+        return room

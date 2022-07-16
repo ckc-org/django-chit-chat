@@ -9,6 +9,7 @@ from channels.db import database_sync_to_async
 from asyncio.exceptions import TimeoutError
 
 from chit_chat.consumers import ChatRoomConsumer
+from chit_chat.serializers import RoomSerializer
 from testproject.testapp.factories import RoomFactory, UserFactory
 from testproject.testapp.serializers import ChatTestSerializer
 
@@ -34,6 +35,18 @@ def create_user(auth_backend=None):
 @database_sync_to_async
 def create_room(**kwargs):
     return RoomFactory(**kwargs)
+
+
+@pytest.mark.django_db
+@database_sync_to_async
+def create_room_through_serializer(*users):
+    class MockRequest:
+        def __init__(self, user):
+            self.user = user
+
+    serializer = RoomSerializer(data={'members': [user.pk for user in users]}, context={'request': MockRequest(users[0])})
+    serializer.is_valid(raise_exception=True)
+    return serializer.save()
 
 
 @pytest.mark.django_db
@@ -225,6 +238,47 @@ async def test_chat_message_proliferates_to_correct_chatroom():
     room = await create_room(members=[user, other_user])
     communicator = await create_websocket_communicator(session_key)
     other_communicator = await create_websocket_communicator(other_session_key)
+
+    # Make sure that a user in a different room does not get the message
+    unrelated_user, unrelated_session_key = await create_user()
+    await create_room(members=[unrelated_user])
+    unrelated_communicator = await create_websocket_communicator(unrelated_session_key)
+
+    # User sends message
+    await communicator.send_json_to({'message_type': 'chat', 'room': room.pk, 'text': 'hello'})
+
+    # Other user receives message
+    response = await other_communicator.receive_json_from()
+    assert response['user'] == user.pk
+    assert response['room'] == room.pk
+
+    # User also receives message
+    response = await communicator.receive_json_from()
+    assert response['user'] == user.pk
+    assert response['room'] == room.pk
+
+    # This user should not receive a message
+    try:
+        await unrelated_communicator.receive_json_from()
+    except TimeoutError:
+        pass
+
+    await communicator.disconnect()
+    await other_communicator.disconnect()
+
+
+@pytest.mark.asyncio
+@pytest.mark.django_db
+async def test_chat_message_proliferates_to_users_who_connected_before_room_was_created():
+    user, session_key = await create_user()
+    other_user, other_session_key = await create_user()
+
+    # Connect first
+    communicator = await create_websocket_communicator(session_key)
+    other_communicator = await create_websocket_communicator(other_session_key)
+
+    # Then create new room
+    room = await create_room_through_serializer(user, other_user)
 
     # Make sure that a user in a different room does not get the message
     unrelated_user, unrelated_session_key = await create_user()
