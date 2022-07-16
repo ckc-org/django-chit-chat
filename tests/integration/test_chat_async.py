@@ -266,6 +266,7 @@ async def test_chat_message_proliferates_to_correct_chatroom():
     await communicator.disconnect()
     await other_communicator.disconnect()
 
+
 @pytest.mark.asyncio
 @pytest.mark.django_db
 async def test_chat_message_proliferates_to_users_who_connected_before_room_was_created():
