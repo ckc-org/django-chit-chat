@@ -79,16 +79,6 @@ urlpatterns = router.urls
 ```
 
 
-## distributing and releasing
-
-```bash
-# Update version in setup.cfg
-./setup.py sdist
-twine upload dist/*
-# Commit and push the version update in setup.cfg
-# Publish vX.X.X release on GitHub with a description.
-```
-
 ## tests
 
 ```bash
