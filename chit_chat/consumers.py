@@ -35,15 +35,18 @@ class ChatRoomConsumer(AsyncWebsocketConsumer):
         if not user.is_authenticated:
             await self.close()
             return
-        for pk in await self.get_chat_room_pks(user):
-            await self.channel_layer.group_add(str(pk), self.channel_name)
+
+        await self.enter_rooms()
+
+        # Allows us to easily send targeted messages to this user throughout the app.
+        await self.channel_layer.group_add(f'user-{user.pk}', self.channel_name)
         await self.accept()
 
     async def disconnect(self, close_code):
         user = self.scope['user']
         if user.is_authenticated:
-            for pk in await self.get_chat_room_pks(self.scope['user']):
-                await self.channel_layer.group_discard(str(pk), self.channel_name)
+            await self.exit_rooms()
+            await self.channel_layer.group_discard(f'user-{user.pk}', self.channel_name)
 
     async def receive(self, text_data=None, bytes_data=None):
         user = self.scope['user']
@@ -74,6 +77,14 @@ class ChatRoomConsumer(AsyncWebsocketConsumer):
                         }
                     )
 
+    async def enter_rooms(self):
+        for pk in await self.get_chat_room_pks(self.scope['user']):
+            await self.channel_layer.group_add(str(pk), self.channel_name)
+
+    async def exit_rooms(self):
+        for pk in await self.get_chat_room_pks(self.scope['user']):
+            await self.channel_layer.group_discard(str(pk), self.channel_name)
+
     @async_validation_exception_handler
     async def validate_content(self, data):
         serializer = ContentSerializer(ChatRoomConsumer.MESSAGE_TYPES, data=data)
@@ -96,6 +107,9 @@ class ChatRoomConsumer(AsyncWebsocketConsumer):
                 'time': event.get('time'),
             })
         )
+
+    async def refresh_group_add(self, _):
+        await self.enter_rooms()
 
     @database_sync_to_async
     def get_chat_room_pks(self, user):
