@@ -89,12 +89,23 @@ class TestChat(APITestCase):
         message_1 = MessageFactory(room=room_1)
         room_2 = RoomFactory(members=[self.user])
         message_2 = MessageFactory(room=room_2)
+        message_3 = MessageFactory(room=room_2)
 
         assert not message_1.users_who_viewed.filter(pk=self.user.pk).exists()
         assert not message_2.users_who_viewed.filter(pk=self.user.pk).exists()
 
-        resp = self.client.post(reverse('room-viewed-all-messages', args=(room_1.pk,)))
-        assert resp.status_code == 200
+        with self.assertNumQueries(5):
+            resp = self.client.post(reverse('room-viewed-all-messages', args=(room_1.pk,)))
+            assert resp.status_code == 200
 
         assert message_1.users_who_viewed.filter(pk=self.user.pk).exists()
         assert not message_2.users_who_viewed.filter(pk=self.user.pk).exists()
+        assert not message_3.users_who_viewed.filter(pk=self.user.pk).exists()
+
+        with self.assertNumQueries(5):
+            resp = self.client.post(reverse('room-viewed-all-messages', args=(room_2.pk,)))
+            assert resp.status_code == 200
+
+        assert message_1.users_who_viewed.filter(pk=self.user.pk).exists()
+        assert message_2.users_who_viewed.filter(pk=self.user.pk).exists()
+        assert message_3.users_who_viewed.filter(pk=self.user.pk).exists()
