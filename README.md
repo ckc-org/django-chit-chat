@@ -88,7 +88,7 @@ $ docker build -t django-chit-chat . && docker run django-chit-chat pytest
 
 ## Releasing
 
-1. Update version number in setup.cfg.
+1. Update version number in `setup.cfg`.
 2. [Create release using Github's UI](https://github.com/ckc-org/django-chit-chat/releases/new). 
    - Click the `Choose a tag` dropdown and create a new tag with the new version number.
    - Click the `Generate release notes` button to automatically create release notes.
