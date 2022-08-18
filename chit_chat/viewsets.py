@@ -28,5 +28,5 @@ class RoomViewSet(
     @action(methods=['post'], detail=True)
     def viewed_all_messages(self, request, pk, *args, **kwargs):
         room = self.get_object()
-        request.user.chat_room_messages_viewed.add(*list(room.messages.all()))
+        request.user.chat_room_messages_viewed.add(*room.messages.all())
         return Response()
