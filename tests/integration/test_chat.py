@@ -98,3 +98,9 @@ class TestChat(APITestCase):
 
         assert message_1.users_who_viewed.filter(pk=self.user.pk).exists()
         assert not message_2.users_who_viewed.filter(pk=self.user.pk).exists()
+
+        resp = self.client.post(reverse('room-viewed-all-messages', args=(room_2.pk,)))
+        assert resp.status_code == 200
+
+        assert message_1.users_who_viewed.filter(pk=self.user.pk).exists()
+        assert message_2.users_who_viewed.filter(pk=self.user.pk).exists()
