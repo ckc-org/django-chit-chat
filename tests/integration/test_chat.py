@@ -83,3 +83,18 @@ class TestChat(APITestCase):
         data = resp.json()['results']
         assert data[0]['id'] == room_1.pk
         assert data[1]['id'] == room_2.pk
+
+    def test_mark_all_messages_in_room_as_viewed(self):
+        room_1 = RoomFactory(members=[self.user])
+        message_1 = MessageFactory(room=room_1)
+        room_2 = RoomFactory(members=[self.user])
+        message_2 = MessageFactory(room=room_2)
+
+        assert not message_1.users_who_viewed.filter(pk=self.user.pk).exists()
+        assert not message_2.users_who_viewed.filter(pk=self.user.pk).exists()
+
+        resp = self.client.post(reverse('room-viewed-all-messages', args=(room_1.pk,)))
+        assert resp.status_code == 200
+
+        assert message_1.users_who_viewed.filter(pk=self.user.pk).exists()
+        assert not message_2.users_who_viewed.filter(pk=self.user.pk).exists()
