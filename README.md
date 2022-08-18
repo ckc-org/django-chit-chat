@@ -84,3 +84,10 @@ urlpatterns = router.urls
 ```bash
 $ docker build -t django-chit-chat . && docker run django-chit-chat pytest
 ```
+
+
+## Releasing
+
+1. Update version number in setup.cfg.
+2. Create release using Github's UI. This will trigger an action to build and push the release to PyPi.
+
