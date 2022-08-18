@@ -1,5 +1,7 @@
 from rest_framework import viewsets, mixins
 from django.db.models import Max
+from rest_framework.decorators import action
+from rest_framework.response import Response
 
 from chit_chat.models import Room
 from chit_chat.serializers import RoomSerializer
@@ -22,3 +24,9 @@ class RoomViewSet(
             'members',
         )
         return qs
+
+    @action(methods=['post'], detail=True)
+    def viewed_all_messages(self, request, pk, *args, **kwargs):
+        room = self.get_object()
+        request.user.chat_room_messages_viewed.set(room.messages.all())
+        return Response()
