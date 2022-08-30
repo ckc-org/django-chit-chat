@@ -96,6 +96,7 @@ async def test_user_is_able_to_connect_and_send_message_after_disconnecting():
 
     assert resp['text'] == messages[0].text
     assert resp['time']
+    assert resp['id'] == messages[0].id
 
     await communicator.disconnect()
 
@@ -149,7 +150,13 @@ async def test_serializer_hook():
 
     resp = await communicator.receive_json_from()
     resp.pop('time')
-    assert resp == {'room': room.pk, 'text': 'hello', 'type': 'chat', 'user': user.pk}
+    assert resp == {
+        'room': room.pk,
+        'text': 'hello',
+        'type': 'chat',
+        'user': user.pk,
+        'id': (await get_messages_from_room(room))[-1].id
+    }
 
     ckc_chat_settings = {
         'MESSAGE': ChatTestSerializer,
