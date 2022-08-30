@@ -74,6 +74,7 @@ class ChatRoomConsumer(AsyncWebsocketConsumer):
                             'room': message.room.pk,
                             'text': message.text,
                             'time': message.created_when.isoformat(),
+                            'id': message.id,
                         }
                     )
 
@@ -105,6 +106,7 @@ class ChatRoomConsumer(AsyncWebsocketConsumer):
                 'text': event.get('text'),
                 'room': event.get('room'),
                 'time': event.get('time'),
+                'id': event.get('id'),
             })
         )
 
