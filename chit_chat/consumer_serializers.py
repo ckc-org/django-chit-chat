@@ -32,4 +32,9 @@ class ChatMessageSerializer(serializers.Serializer):
         return attrs
 
     def create(self, validated_data):
-        return Message.objects.create(**validated_data)
+        message = Message.objects.create(**validated_data)
+
+        # Add sender as viewer
+        message.users_who_viewed.add(message.user)
+
+        return message

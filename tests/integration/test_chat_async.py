@@ -1,3 +1,5 @@
+import asyncio
+
 import pytest
 from django.contrib.sessions.models import Session
 from django.contrib.auth import HASH_SESSION_KEY, SESSION_KEY, BACKEND_SESSION_KEY, get_user_model
@@ -10,12 +12,16 @@ from asyncio.exceptions import TimeoutError
 
 from chit_chat.consumers import ChatRoomConsumer
 from chit_chat.serializers import RoomSerializer
+from chit_chat.models import Message
 from testproject.testapp.factories import RoomFactory, UserFactory
 from testproject.testapp.serializers import ChatTestSerializer
 
 User = get_user_model()
 
 
+# ----------------------------------------------------------------------------
+# Database helper functions
+# ----------------------------------------------------------------------------
 @pytest.mark.django_db
 @database_sync_to_async
 def create_user(auth_backend=None):
@@ -55,6 +61,14 @@ def get_messages_from_room(room):
     return list(room.messages.all().order_by('created_when').select_related('user'))
 
 
+@database_sync_to_async
+def _get_message_object(**kwargs):
+    return Message.objects.get(**kwargs)
+
+
+# ----------------------------------------------------------------------------
+# Websocket helper functions
+# ----------------------------------------------------------------------------
 async def create_websocket_communicator(session_id):
     communicator = WebsocketCommunicator(
         get_default_application(),
@@ -66,6 +80,9 @@ async def create_websocket_communicator(session_id):
     return communicator
 
 
+# ----------------------------------------------------------------------------
+# Tests
+# ----------------------------------------------------------------------------
 @pytest.mark.asyncio
 @pytest.mark.django_db
 async def test_connection_to_chat_room_requires_session_cookie():
@@ -155,7 +172,8 @@ async def test_serializer_hook():
         'text': 'hello',
         'type': 'chat',
         'user': user.pk,
-        'id': (await get_messages_from_room(room))[-1].id
+        'id': (await get_messages_from_room(room))[-1].id,
+        'users_who_viewed': [user.pk],
     }
 
     ckc_chat_settings = {
@@ -295,15 +313,23 @@ async def test_chat_message_proliferates_to_users_who_connected_before_room_was_
     # User sends message
     await communicator.send_json_to({'message_type': 'chat', 'room': room.pk, 'text': 'hello'})
 
+    # Wait for message object to be created...
+    await asyncio.sleep(0.1)
+
+    # Message is marked as read by the sender
+    await _get_message_object(user=user, users_who_viewed__in=[user])
+
     # Other user receives message
     response = await other_communicator.receive_json_from()
     assert response['user'] == user.pk
     assert response['room'] == room.pk
+    assert response['users_who_viewed'] == [user.pk]
 
     # User also receives message
     response = await communicator.receive_json_from()
     assert response['user'] == user.pk
     assert response['room'] == room.pk
+    assert response['users_who_viewed'] == [user.pk]
 
     # This user should not receive a message
     try:
