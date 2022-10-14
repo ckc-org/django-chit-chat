@@ -25,3 +25,6 @@ class Message(models.Model):
     user = models.ForeignKey(User, related_name='chat_room_messages', on_delete=models.CASCADE)
     created_when = models.DateTimeField(default=timezone.now)
     users_who_viewed = models.ManyToManyField(User, related_name='chat_room_messages_viewed')
+
+    def __str__(self):
+        return f"Sent by User.id = {self.user_id} @ {self.created_when:%I:%M%p}"
