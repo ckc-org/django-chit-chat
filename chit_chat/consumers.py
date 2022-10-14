@@ -75,6 +75,8 @@ class ChatRoomConsumer(AsyncWebsocketConsumer):
                             'text': message.text,
                             'time': message.created_when.isoformat(),
                             'id': message.id,
+                            # Attach the user who sent it as someone who has already viewed it
+                            'users_who_viewed': [user.pk],
                         }
                     )
 
@@ -107,6 +109,7 @@ class ChatRoomConsumer(AsyncWebsocketConsumer):
                 'room': event.get('room'),
                 'time': event.get('time'),
                 'id': event.get('id'),
+                'users_who_viewed': event.get('users_who_viewed'),
             })
         )
 

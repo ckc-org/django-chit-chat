@@ -172,7 +172,8 @@ async def test_serializer_hook():
         'text': 'hello',
         'type': 'chat',
         'user': user.pk,
-        'id': (await get_messages_from_room(room))[-1].id
+        'id': (await get_messages_from_room(room))[-1].id,
+        'users_who_viewed': [user.pk],
     }
 
     ckc_chat_settings = {
@@ -322,11 +323,13 @@ async def test_chat_message_proliferates_to_users_who_connected_before_room_was_
     response = await other_communicator.receive_json_from()
     assert response['user'] == user.pk
     assert response['room'] == room.pk
+    assert response['users_who_viewed'] == [user.pk]
 
     # User also receives message
     response = await communicator.receive_json_from()
     assert response['user'] == user.pk
     assert response['room'] == room.pk
+    assert response['users_who_viewed'] == [user.pk]
 
     # This user should not receive a message
     try:
